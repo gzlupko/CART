@@ -22,6 +22,18 @@ We will also be accessing an algorithm from the [Weka suite](https://www.cs.waik
 
 The last package you will need is [C50](https://cran.r-project.org/web/packages/C50/index.html).
 
+## Libraries
+
+```{r}
+library(caret) 
+library(C50) 
+library(RWeka) 
+library(tidyverse) 
+library(kableExtra) 
+
+```
+
+
 ## Data
 
 The data comes from a university registrar's office. The code book for the variables are available in the file code-book.txt. Examine the variables and their definitions.
@@ -30,11 +42,38 @@ Upload the drop-out.csv data into R as a data frame.
 
 ```{r}
 
+drop_out <- data.frame(read_csv("drop-out.csv")) 
+
+drop_out %>% 
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) 
+
+head(drop_out) 
+View(drop_out) 
+
 ```
 
 The next step is to separate your data set into a training set and a test set. Randomly select 25% of the students to be the test data set and leave the remaining 75% for your training data set. (Hint: each row represents an answer, not a single student.)
 
 ```{r}
+
+# filter by unique students - remove duplicate IDs
+
+set.seed(180) 
+drop_out_distinct <- drop_out %>% 
+  distinct(student_id, .keep_all = TRUE) 
+
+
+trainData <- createDataPartition(
+  y = drop_out_distinct$complete, 
+  p = 0.75, 
+  list = FALSE
+)
+
+training <- drop_out_distinct[trainData, ]
+testing <- drop_out_distinct[-trainData, ]
+
+cntrl <- trainControl(method = "cv", repeats = 5) 
 
 
 ```
@@ -45,6 +84,12 @@ For this assignment you will be predicting the student level variable "complete"
 Visualize the relationships between your chosen variables as a scatterplot matrix.  Save your image as a .pdf named scatterplot_matrix.pdf. Based on this visualization do you see any patterns of interest? Why or why not?
 
 ```{r}
+library(GGally) 
+
+# fix this - ggpairs(drop_out_distinct, ggplot2::aes(colour = complete))
+
+
+
 
 ```
 
