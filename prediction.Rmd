@@ -55,28 +55,52 @@ View(drop_out)
 
 The next step is to separate your data set into a training set and a test set. Randomly select 25% of the students to be the test data set and leave the remaining 75% for your training data set. (Hint: each row represents an answer, not a single student.)
 
+## Data Cleaning 
+
 ```{r}
 
 # filter by unique students - remove duplicate IDs
 
-set.seed(180) 
+set.seed(182) 
+
 drop_out_distinct <- drop_out %>% 
   distinct(student_id, .keep_all = TRUE) 
 
 
+drop_out_1 <- drop_out_distinct %>% 
+  mutate(student_id = as.factor(student_id), course_id = as.factor(course_id), 
+         gender = as.factor(gender), complete = factor(complete, levels  = c("no", "yes")), international = as.factor(international), 
+         online = as.factor(online)) 
+  
+
+# exclude enrollment date 
+
+drop_out_1 <- drop_out_1 %>%
+  select(-c(enroll_date_time))
+
+
+```
+
+## Split Data 
+
+```{r}
+
+
 trainData <- createDataPartition(
-  y = drop_out_distinct$complete, 
+  y = drop_out_1$complete, 
   p = 0.75, 
   list = FALSE
 )
 
-training <- drop_out_distinct[trainData, ]
-testing <- drop_out_distinct[-trainData, ]
+
+training <- drop_out_1[trainData, ]
+testing <- drop_out_1[-trainData, ]
 
 cntrl <- trainControl(method = "cv", repeats = 5) 
 
-
 ```
+
+
 
 For this assignment you will be predicting the student level variable "complete". 
 (Hint: make sure you understand the increments of each of your chosen variables, this will impact your tree construction)
@@ -86,7 +110,17 @@ Visualize the relationships between your chosen variables as a scatterplot matri
 ```{r}
 library(GGally) 
 
-# fix this - ggpairs(drop_out_distinct, ggplot2::aes(colour = complete))
+# View correlations among predictor variabl es 
+drop_out_1 %>%
+  select(-c(student_id)) %>%
+  ggpairs(ggplot2::aes(colour = complete))
+
+# pair plot excluding student_ids 
+pairs(drop_out_1[c(2:9), ], lower.panel = NULL)  
+  
+
+
+ggpairs(drop_out_1, ggplot2::aes(colour = complete))
 
 
 
