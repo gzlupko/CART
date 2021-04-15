@@ -110,19 +110,18 @@ Visualize the relationships between your chosen variables as a scatterplot matri
 ```{r}
 library(GGally) 
 
+View(drop_out_1)
+
 # View correlations among predictor variabl es 
 drop_out_1 %>%
-  select(-c(student_id)) %>%
+  select(c(entrance_test_score, courses_taken, complete)) %>%
   ggpairs(ggplot2::aes(colour = complete))
 
 # pair plot excluding student_ids 
-pairs(drop_out_1[c(2:9), ], lower.panel = NULL)  
+my_colors <- c("#00AFBB", "#E7B800")
+pairs(drop_out_1[, c(2:6)], lower.panel = NULL, 
+      col = my_colors[drop_out_1$complete])
   
-
-
-ggpairs(drop_out_1, ggplot2::aes(colour = complete))
-
-
 
 
 ```
