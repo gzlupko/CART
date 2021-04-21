@@ -1,11 +1,11 @@
 ---
 title: "HUDK4051: Prediction - Comparing Trees"
-author: "Charles Lang"
-date: "1/9/2018"
+author: "Gian Zlupko"
+date: "4/21/2021"
 output: html_document
 ---
 
-In this assignment you will modelling student data using three flavors of tree algorithm: CART, C4.5 and C5.0. We will be using these algorithms to attempt to predict which students drop out of courses. Many universities have a problem with students over-enrolling in courses at the beginning of semester and then dropping most of them as the make decisions about which classes to attend. This makes it difficult to plan for the semester and allocate resources. However, schools don't want to restrict the choice of their students. One solution is to create predictions of which students are likley to drop out of which courses and use these predictions to inform semester planning. 
+In this assignment you will modeling student data using three flavors of tree algorithm: CART, C4.5 and C5.0. We will be using these algorithms to attempt to predict which students drop out of courses. Many universities have a problem with students over-enrolling in courses at the beginning of semester and then dropping most of them as the make decisions about which classes to attend. This makes it difficult to plan for the semester and allocate resources. However, schools don't want to restrict the choice of their students. One solution is to create predictions of which students are likley to drop out of which courses and use these predictions to inform semester planning. 
 
 In this assignment we will be using the tree algorithms to build models of which students are likely to drop out of which classes. 
 
@@ -261,26 +261,32 @@ confusionMatrix(data = condInf_fit, as.factor(TEST2$complete))
 There is an updated version of the C4.5 model called C5.0, it is implemented in the C50 package. What improvements have been made to the newer version? 
 
 
+The C5.0 model extends the C4.5 model by enabling the C5.0 model to work with non-numeric data. C5.0 is typically faster to run than the C4.5 and it uses substantially less memory to run.  
+
+
 Install the C50 package, train and then test the C5.0 model on the same data.
 
 ```{r}
+library(C50) 
 
 # train the C5.0 model 
-C5.0_model <- C5.0(TRAIN1, TRAIN1$complete) 
+C5.0_model <- C5.0(x = TRAIN2[ ,-4], 
+                   y = TRAIN2$complete) 
 
 C5.0_model
 summary(C5.0_model) 
 
+# visualize the C5.0 Model 
+plot(C5.0_model) 
 
 #Remove the student_id variable that we do not want to use in the model
-TEST1 <- testing 
-TEST2 <- TEST1[,c(2:9)] 
+
 
 #Generate prediction using previously trained model
-C5_prediction <- predict(C5.0_model, newdata = TEST2)
+C50_prediction <- predict(C5.0_model, newdata = TEST2)
 
 #Generate model statistics
-confusionMatrix(data = C5_prediction, as.factor(TEST2$complete))
+confusionMatrix(data = C50_prediction, as.factor(TEST2$complete))
 
 
 ```
