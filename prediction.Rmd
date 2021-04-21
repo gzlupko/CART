@@ -77,7 +77,6 @@ drop_out_1 <- drop_out_distinct %>%
 drop_out_1 <- drop_out_1 %>%
   select(-c(enroll_date_time))
 
-
 ```
 
 ## Split Data 
@@ -170,10 +169,11 @@ cartFit
 
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
 
-
-
+In our case, predicting true positives is key (e.g. did not complete the course) becuase we will want to design interventions to help students complete the course. Therefore we are really interested in sensitivity metric ('recall'), which examines model performance with regards to true positives. Sensitivity was .91 which isg good. 
 
 Can you use the sensitivity and specificity metrics to calculate the F1 metric?
+
+From a confusion matrix we could calculate F1 from the model's predicted outputs. F1 = (2TP) / (2TP + FP + FN). However, we cannnot calculate an F1 value from sensitivity and specificity as F1 is the harmonic mean of sensitivity and precision, not specificity 
 
 Now predict results from the test data and describe important attributes of this test. Do you believe it is a successful model of student performance, why/why not?
 
@@ -190,12 +190,13 @@ confusionMatrix(data = cartClasses, as.factor(TEST2$complete))
 
 ```
 
+
 ## Conditional Inference Trees
 
 Train a Conditional Inference Tree using the `party` package on the same training data and examine your results.
 
-```{r}
-install.packages("party") 
+```{r, warning = FALSE}
+
 library(party) 
 
 
@@ -211,22 +212,54 @@ condFit <- train(complete ~ ., #Define which variable to predict
 condFit
 
 
-# Generate predictions with conditional tree model 
-condFitClasses<- predict(condFit, newdata = TEST2)
-
-#Generate model statistics
-confusionMatrix(data = condFitClasses, as.factor(TEST2$complete))
-
 
 ```
 
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
 
+Sensitivity/recall is 0.95 for this conditional inference tree model which indicates that it is a good predictor of instances in which students are not completing the course. 
+
+
+
+```{r}
+library(partykit) 
+completeCondInf <- ctree(complete ~.,  data = TRAIN2) 
+print(completeCondInf) 
+plot(completeCondInf) 
+
+```
+
 What does the plot represent? What information does this plot tell us?
+
+Conditional inference trees use p-value tests to select input values. This plot tells us that courses has a significant relationship with course completion. In particular, the plot tells us that whether a student has taken more than one previous course significantly relates to completion. Students that have taken more than one previous course are more likely to complete the course.
 
 Now test your new Conditional Inference model by predicting the test data and generating model fit statistics.
 
+
+```{r}
+
+# Generate predictions with conditional tree model with party package 
+condFitClasses<- predict(condFit, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = condFitClasses, as.factor(TEST2$complete))
+```
+
+
+Predicting conditional inference tree on test data using the 'partykit' package as well: 
+```{r}
+
+# Generate predictions with conditional tree model with partykit package 
+condInf_fit <- predict(completeCondInf, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = condInf_fit, as.factor(TEST2$complete))
+
+```
+
+
 There is an updated version of the C4.5 model called C5.0, it is implemented in the C50 package. What improvements have been made to the newer version? 
+
 
 Install the C50 package, train and then test the C5.0 model on the same data.
 
