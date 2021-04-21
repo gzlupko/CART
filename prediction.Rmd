@@ -24,7 +24,7 @@ The last package you will need is [C50](https://cran.r-project.org/web/packages/
 
 ## Libraries
 
-```{r}
+```{r, echo = FALSE}
 library(caret) 
 library(C50) 
 library(RWeka) 
@@ -32,7 +32,6 @@ library(tidyverse)
 library(kableExtra) 
 
 ```
-
 
 ## Data
 
@@ -49,7 +48,7 @@ drop_out %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = F) 
 
 head(drop_out) 
-View(drop_out) 
+
 
 ```
 
@@ -83,7 +82,7 @@ drop_out_1 <- drop_out_1 %>%
 
 ## Split Data 
 
-```{r}
+```{r, warning = FALSE}
 
 
 trainData <- createDataPartition(
@@ -134,8 +133,11 @@ Construct a classification tree that predicts complete using the caret package.
 
 ```{r}
 library(caret)
+library(MLmetrics) 
 
-TRAIN2 <- TRAIN1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
+TRAIN1 <- training 
+
+TRAIN2 <- TRAIN1[,c(2:9)] #Remove the student_id variable that we do not want to use in the model
 
 #caret does not summarize the metrics we want by default so we have to modify the output
 MySummary  <- function(data, lev = NULL, model = NULL){
@@ -165,15 +167,21 @@ cartFit
 
 ```
 
+
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
+
+
+
 
 Can you use the sensitivity and specificity metrics to calculate the F1 metric?
 
 Now predict results from the test data and describe important attributes of this test. Do you believe it is a successful model of student performance, why/why not?
 
 ```{r}
-TEST2 <- TEST1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
+TEST1 <- testing 
 
+TEST2 <- TEST1[,c(2:9)] #Remove the student_id variable that we do not want to use in the model
+ 
 #Generate prediction using previously trained model
 cartClasses <- predict(cartFit, newdata = TEST2)
 
@@ -185,9 +193,33 @@ confusionMatrix(data = cartClasses, as.factor(TEST2$complete))
 ## Conditional Inference Trees
 
 Train a Conditional Inference Tree using the `party` package on the same training data and examine your results.
+
 ```{r}
-condFit <- 
+install.packages("party") 
+library(party) 
+
+
+# Conditional Tree train 
+condFit <- train(complete ~ ., #Define which variable to predict 
+                data = TRAIN2, #Define the data set to train the model on
+                trControl = ctrl, #Tell caret the control elements
+                method = "ctree2", #Define the model type
+                metric = "Accuracy", #Final model choice is made according to sensitivity
+                preProc = c("center", "scale")) #Center and scale the data to minimize the 
+
+#Check the results
+condFit
+
+
+# Generate predictions with conditional tree model 
+condFitClasses<- predict(condFit, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = condFitClasses, as.factor(TEST2$complete))
+
+
 ```
+
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
 
 What does the plot represent? What information does this plot tell us?
@@ -199,7 +231,25 @@ There is an updated version of the C4.5 model called C5.0, it is implemented in 
 Install the C50 package, train and then test the C5.0 model on the same data.
 
 ```{r}
-c50Fit <- 
+
+# train the C5.0 model 
+C5.0_model <- C5.0(TRAIN1, TRAIN1$complete) 
+
+C5.0_model
+summary(C5.0_model) 
+
+
+#Remove the student_id variable that we do not want to use in the model
+TEST1 <- testing 
+TEST2 <- TEST1[,c(2:9)] 
+
+#Generate prediction using previously trained model
+C5_prediction <- predict(C5.0_model, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = C5_prediction, as.factor(TEST2$complete))
+
+
 ```
 
 ## Compare the models
