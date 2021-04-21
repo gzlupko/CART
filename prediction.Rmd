@@ -289,17 +289,32 @@ C50_prediction <- predict(C5.0_model, newdata = TEST2)
 confusionMatrix(data = C50_prediction, as.factor(TEST2$complete))
 
 
+
+c50_fit <- train(complete ~ ., #Define which variable to predict 
+                data = TRAIN2, #Define the data set to train the model on
+                trControl = ctrl, #Tell caret the control elements
+                method = "C5.0", #Define the model type
+                metric = "Accuracy", #Final model choice is made according to sensitivity
+                preProc = c("center", "scale")) #Center and scale the data to minimize the 
+
+#Check the results
+c50_fit
+
 ```
 
 ## Compare the models
 
-caret allows us to compare all three models at once.
+Caret allows us to compare all three models at once.
 
 ```{r}
-resamps <- resamples(list(cart = cartFit, condinf = condFit, cfiveo = c50Fit))
+resamps <- resamples(list(cart = cartFit, condinf = condFit, cfiveo = c50_fit))
 summary(resamps)
 ```
 
 What does the model summary tell us? Which model do you believe is the best?
 
+The model comparison shows us that the tree models used in this assignment are all relatively good predictors of student completion. In selecting the model wit the best performance, we can look at the recall/sensitivity metric comparison across each tree model. The comparison shows that the conditional inference model is the best predictor of true positives (e.g. student does not complete the course), which is most important to us in this use case. 
+
 Which variables (features) within your chosen model are important, do these features provide insights that may be useful in solving the problem of students dropping out of courses?
+
+Courses taken is the most important feature in the models used. If this is true, the university can take meausures to ensure that students matriculate through the program and that students that are more at risk of not completing courses can receive the support that they need.  
